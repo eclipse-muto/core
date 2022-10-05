@@ -44,11 +44,11 @@ if (CATKIN_ENABLE_TESTING)
 
     install(
             PROGRAMS
-            test/core_testcases_a.py
-            test/core_testcases_b.py
-            test/core_testcases_param.py
-            test/core_testcases_edge_device.py
-            test/core_testcase_node.py
+            test/test_edgedevice.py
+            test/test_node_basic.py
+            test/test_node.py
+            test/test_param.py
+            test/test_stack_comparemerge.py
             DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
 

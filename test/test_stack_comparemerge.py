@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 #  Copyright (c) 2022 Composiv.ai, Eteration A.S. and others
 #
@@ -14,7 +15,6 @@
 #    Composiv.ai, Eteration A.S. - initial API and implementation
 #
 #
-#!/usr/bin/env python
 
 import unittest
 
@@ -44,7 +44,7 @@ _spec = {'name': _name,  'value': _value,
          'default': _default, 'description': _description}
 
 
-class CaseA(unittest.TestCase):
+class TestStackCompareAndMerge(unittest.TestCase):
 
     def setUp(self):
         rospy.init_node(NODE_NAME)
@@ -102,23 +102,23 @@ class CaseA(unittest.TestCase):
         self.assertIsNotNone(all)
       
 
-        self.assertEqual(len(all), 21,
-                         'Number of common nodes must be 6 but it was {}'.format(len(all)))
+        self.assertEqual(len(all.node), 21,
+                         'Number of common nodes must be 21 but it was {}'.format(len(all.node)))
 
         count = 0
-        for n in all:
+        for n in all.node:
             if n.action == 'none':
                 count = count + 1
         self.assertEqual(count, 6,
                          'Number of no action must be 6 but it was {}'.format(count))
         count = 0
-        for n in all:
+        for n in all.node:
             if n.action == 'start':
                 count = count + 1
         self.assertEqual(count, 15,
                          'Number of no action must be 15 but it was {}'.format(count))
         count = 0
-        for n in all:
+        for n in all.node:
             if n.action == 'stop':
                 count = count + 1
         self.assertEqual(count, 0,
@@ -141,5 +141,5 @@ if __name__ == '__main__':
 
     rostest.rosrun(
         PKG,
-        'test_muto_stack_model_arg',
-        CaseA)
+        'TestStackCompareAndMerge',
+        TestStackCompareAndMerge)

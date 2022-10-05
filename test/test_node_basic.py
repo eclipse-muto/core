@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 #
 #  Copyright (c) 2022 Composiv.ai, Eteration A.S. and others
 #
@@ -14,7 +15,6 @@
 #    Composiv.ai, Eteration A.S. - initial API and implementation
 #
 #
-#! /usr/bin/env python
 
 import unittest
 
@@ -30,7 +30,7 @@ PKG = 'muto_core'
 NODE_NAME = 'muto_core'
 
 
-class TestNodeModel(unittest.TestCase):
+class TestNodeBasic(unittest.TestCase):
 
     @patch('core.model.edge_device.EdgeDevice')
     def test_node_basic(self, mock_device):
@@ -65,8 +65,8 @@ if __name__ == '__main__':
 
     rostest.rosrun(
         PKG,
-        'Test Stack Nodes',
-        TestNodeModel
+        'TestNodeBasic',
+        TestNodeBasic
     )
 
 

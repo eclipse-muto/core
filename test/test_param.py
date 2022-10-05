@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 #
 #  Copyright (c) 2022 Composiv.ai, Eteration A.S. and others
 #
@@ -14,7 +15,6 @@
 #    Composiv.ai, Eteration A.S. - initial API and implementation
 #
 #
-#! /usr/bin/env python
 
 from os import uname
 from re import S
@@ -35,7 +35,7 @@ _from_file = '$(find muto_core)/test/configs/amcl.yaml'
 _manifest_LSFF = {'from' :_from_file}
 
 
-class CaseC(unittest.TestCase):
+class TestParam(unittest.TestCase):
 
     @patch('core.model.edge_device.EdgeDevice')
     def setUp(self,mock_device):
@@ -142,9 +142,8 @@ class CaseC(unittest.TestCase):
 
         paramObj = param.Param(self.stack,manifest=manifest)
         paramObj.load()
-        self.assertEqual(rospy.get_param(manifest['namespace'] + manifest['name']) == "http://localhost:11311",True)
-
-     
+        self.assertEqual(rospy.get_param(manifest['namespace'] + manifest['name']), paramObj.value ,
+                    'Parameter URI is incorrect. It must be {} but it was {}'.format(paramObj.value, rospy.get_param(manifest['namespace'] + manifest['name'])))
     
 if __name__ == '__main__':
     import rostest
@@ -152,4 +151,4 @@ if __name__ == '__main__':
     rostest.rosrun(
         PKG,
         'Test Muto Stack Model: Param',
-        CaseC)
+        TestParam)

@@ -1,3 +1,7 @@
 <launch>
-    <test pkg="muto_core" test-name="cass_composiv_core_test_C" type="core_testcase_node.py"/>
+    <test pkg="muto_core" test-name="test_stack_comparemerge" type="test_stack_comparemerge.py"/>
+    <test pkg="muto_core" test-name="test_node" type="test_node.py"/>
+    <test pkg="muto_core" test-name="test_node_basic" type="test_node_basic.py"/>
+    <test pkg="muto_core" test-name="test_edgedevice" type="test_edgedevice.py"/>
+    <test pkg="muto_core" test-name="test_param" type="test_param.py"/>
 </launch> 
