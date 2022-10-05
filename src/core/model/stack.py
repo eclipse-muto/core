@@ -14,8 +14,6 @@
 #    Composiv.ai, Eteration A.S. - initial API and implementation
 #
 #
-
-from celery import uuid
 import rospkg
 import os
 import roslaunch
@@ -165,7 +163,7 @@ class Stack(object):
         for p in self._param:
             manifest["param"].append(p.toManifest())
         for a in self.arg:
-            manifest["arg"].append(a.toManifest())
+            manifest["arg"].append(self.arg[a])
         for s in self._stack:
             manifest["stack"].append(s.toShallowManifest())
         for n in self._node:
