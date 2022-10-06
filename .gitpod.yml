@@ -3,5 +3,7 @@
 # and commit this file to your remote git repository to share the goodness with others.
 image: eteration/muto-ros:noetic-desktop-full
 tasks:
-   - before: source /opt/ros/noetic/setup.bash
-   - init: docker run -it --rm -v /workspace/core:/home/muto_ws/src/core -w /home/muto_ws   eteration/muto-ros:noetic-desktop-full catkin_make
+   - init: source /opt/ros/noetic/setup.bash
+   - init: mkdir -p ./tmp/muto/src/
+   - init: ln -s /workspace/core /workspace/core/tmp/muto/src/
+   - init: cd /workspace/core/tmp/muto
