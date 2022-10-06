@@ -7,8 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     container: eteration/muto-ros:noetic-desktop-full
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - run: |
-          source /opt/ros/noetic/setup.bash
           mkdir -p $(pwd)/tmp/muto/src/
           ln -s $(pwd) $(pwd)/tmp/muto/src/
           cd $(pwd)/tmp/muto
