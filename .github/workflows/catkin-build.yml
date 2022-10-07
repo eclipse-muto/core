@@ -17,4 +17,5 @@ jobs:
           . /opt/ros/noetic/setup.sh
           catkin_make
           catkin_make test
+          catkin_test_results --all --verbose
         name: Build in ros container
