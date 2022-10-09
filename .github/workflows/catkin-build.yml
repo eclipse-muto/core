@@ -24,6 +24,6 @@ jobs:
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.0.0
         with:
-          junit_files: "**/build/test-results/**/*.xml"
-          nunit_files: "**/build/test-results/**/*.xml"
-          xunit_files: "**//build/test-results/**/*.xml"
+          junit_files: "/github/workspace/tmp/muto/build/test_results/**/*.xml"
+          nunit_files: "/github/workspace/tmp/muto/build/test_results/**/*.xml"
+          xunit_files: "/github/workspace/tmp/muto/build/test_results/**/*.xml"
