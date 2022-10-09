@@ -20,8 +20,4 @@ jobs:
           catkin_make test || true
           catkin_test_results --all --verbose
         name: Build in ros container
-  
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.0.0
-        with:
-          xunit_files: "**/build/test_results/**/*.xml"
+
