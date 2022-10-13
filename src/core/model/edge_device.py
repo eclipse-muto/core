@@ -58,23 +58,26 @@ class EdgeDevice(object):
         if not current is None:
             self._currentStack = stack.Stack(self, current, None)
         self._currentStack.launch()
-        self.twin.publishStack(self._currentStack, state=ACTIVE)
+        self.twin.setCurrentStack(self._currentStack, state=ACTIVE)
         self._state = ACTIVE
 
     def apply(self, current=None):
         if not current is None:
             self._currentStack = stack.Stack(self, current, None)
         self._currentStack.apply()
-        self.twin.publishStack(self._currentStack, state=ACTIVE)
+        self.twin.setCurrentStack(self._currentStack, state=ACTIVE)
         self._state = ACTIVE
 
     def kill(self, payload=None):
-        if self._currentStack:
-            self._currentStack.kill()
-        if not payload is None:
-            self._currentStack = stack.Stack(self, payload, None)
-            self._currentStack.kill()
-        self.twin.publishStack(self._currentStack, state=KILLED)
+        try:
+            if self._currentStack:
+                self._currentStack.kill()
+            if not payload is None:
+                self._currentStack = stack.Stack(self, payload, None)
+                self._currentStack.kill()
+        except Exception as e:
+            print("Failed to kill {}".format(e))
+        self.twin.setCurrentStack(self._currentStack, state=KILLED)
         self._state = KILLED
 
     def stack(self, stackId):

@@ -101,7 +101,7 @@ class Twin(object):
             payload = json.loads(r.text)
             return payload.get('properties', {})
         except Exception as ex:
-            print("Could not get stack from twins repo", str(ex))
+            print('Could not get stack from twins repo {}'.format(ex))
         return None
 
     def vehicle(self, vehicle):
@@ -110,11 +110,10 @@ class Twin(object):
             print("Status Code: %d, Response: %s" % (r.status_code, r.text))
             if r.status_code >= 300:
                 return None
-            payload = json.loa
             payload = json.loads(r.text)
             return payload
         except Exception as ex:
-            print("Could not get stack from twins repo", str(ex))
+            print('Could not get stack from twins repo {}'.format(ex))
         return None
 
     def publishTelemetry(self, path, value):
@@ -135,6 +134,27 @@ class Twin(object):
             if id:
                 self.publishFeature(
                     "/features/stack/properties/current", {"stackId": id, "state": state})
+                
+    def setCurrentStack(self, stack, state='unknown'):
+        if not stack:
+            return
+        deftn = stack.manifest
+        stackId = deftn.get('stackId', None)
+        headers = {'Content-type': 'application/json'}
+
+        if not stackId is None:
+            r = requests.put(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
+                    headers=headers, json={"stackId": stackId, "state": state})
+            print("Status Code: %d, Response: %s" % (r.status_code, r.text))  
+            return 
+  
+        stacks = deftn.get('stack', [])
+        for s in stacks:
+            id = s.get('thingId', '')
+            if id:
+                r = requests.post(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
+                        headers=headers, json={"stackId": id, "state": state})
+                print("Status Code: %d, Response: %s" % (r.status_code, r.text))  
 
     def publishFeature(self, path, value, rate=-10000):
         if not self.publisher:

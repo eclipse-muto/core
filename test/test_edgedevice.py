@@ -51,7 +51,7 @@ class TestEdgeDeviceModel(unittest.TestCase):
 
         device.activate(current=None)
 
-        mock_twin.publishStack.assert_called_with(device.currentStack, state="active")
+        mock_twin.setCurrentStack.assert_called_with(device.currentStack, state="active")
         device.kill(payload=None)
 
 
