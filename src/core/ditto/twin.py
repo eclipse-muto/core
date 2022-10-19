@@ -156,6 +156,54 @@ class Twin(object):
                         headers=headers, json={"stackId": id, "state": state})
                 print("Status Code: %d, Response: %s" % (r.status_code, r.text))  
 
+    def get_telemetry(self):
+            headers = {'Content-type': 'application/json'}
+            r = requests.get(self.twin_url + "/api/2/things/{}/features/telemetry/properties".format(self.thingId),
+                    headers=headers)
+            print("Status Code: %d, Response: %s" % (r.status_code, r.text))
+            payload = json.loads(r.text)
+            return payload
+
+    def save_telemetry(self, telemetry):
+        if not telemetry:
+            return
+        deftn = telemetry.manifest
+        headers = {'Content-type': 'application/json'}
+        all = self.get_telemetry()
+        mylist = []
+        alldefs = all.get("definition")
+        if not alldefs is None:
+            def other(s1):
+                if s1.get("topic") != deftn.get("topic"): 
+                    return True 
+                return False
+            mylist = list(filter(other, alldefs))
+        mylist.append(deftn)
+        r = requests.put(self.twin_url + "/api/2/things/{}/features/telemetry/properties/definition".format(self.thingId),
+                    headers=headers, json=mylist)
+        print("Status Code: %d, Response: %s" % (r.status_code, r.text))  
+        return 
+
+    def delete_telemetry(self, telemetry):
+        if not telemetry:
+            return
+        deftn = telemetry.manifest
+        headers = {'Content-type': 'application/json'}
+        all = self.get_telemetry()
+        mylist = []
+        alldefs = all.get("definition")
+        if not alldefs is None:
+            def other(s1):
+                if s1.get("topic") != deftn.get("topic"): 
+                    return True 
+                return False
+            mylist = list(filter(other, alldefs))
+        r = requests.put(self.twin_url + "/api/2/things/{}/features/telemetry/properties/definition".format(self.thingId),
+                    headers=headers, json=mylist)
+        print("Status Code: %d, Response: %s" % (r.status_code, r.text))  
+        return 
+
+                
     def publishFeature(self, path, value, rate=-10000):
         if not self.publisher:
             return
