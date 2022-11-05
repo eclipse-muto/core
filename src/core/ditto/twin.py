@@ -34,17 +34,16 @@ class Twin(object):
 
         self.twin_url = config['twin_url']
         self.publisher = publisher
-        self.namespace = config.get(
-            "namespace",  config.get("thing", {}).get("namespace"))
+        self.namespace = config.get("namespace",  config.get("thing", {}).get("namespace"))
         self.type = config['type']
-        uniqueName = config.get(
-            "uniqueName",  config['type']+"."+str(uuid.uuid4()))
+        uniqueName = config.get("uniqueName",  config['type']+"."+str(uuid.uuid4()))
 
         if rospy.has_param(node+'/muto/thing/anonymous'):
             anonymous = rospy.get_param(node+"/muto/thing/anonymous")
             if anonymous is False:
                 uniqueName = rospy.get_param(node+"/muto/thing/name")
-
+        self.attributes = config.get("thing", {}).get("attributes",{})
+        self.definition = config.get("thing", {}).get("definition", "org.eclipse.muto:EdgeDevice:0.0.1")
         self._uniqueName = uniqueName
         self._topic = self.namespace+":" + uniqueName
         self.thingId = self.namespace + ":" + uniqueName
@@ -232,19 +231,10 @@ class Twin(object):
 
     def get_register_data(self):
         return {
-            "definition": "ai.composiv.sandbox.f1tenth.simulator:TestCar:1.0.0",
-            "attributes": {
-                "manufacturer": "Eteration",
-                "serial": self.uniqueName,
-                "type": self.type
-            },
+            "definition": self.definition,
+            "attributes": self.attributes,
             "features": {
                 "context": {
-                    "properties": {
-                        "name": "office-area-2"
-                    }
-                },
-                "rosModel": {
                     "properties": {
                     }
                 },
@@ -252,17 +242,8 @@ class Twin(object):
                     "properties": {
                     }
                 },
-                "sensors": {
-                    "properties": {
-                        "camera": {},
-                        "imu": {},
-                        "controller": {}
-                    }
-                },
                 "telemetry": {
                     "properties": {
-                        "velocity": 0,
-                        "steering_angle": 0,
                     }
                 }
             }
