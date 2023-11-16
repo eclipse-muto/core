@@ -1,25 +1,29 @@
-#
-#  Copyright (c) 2022 Composiv.ai, Eteration A.S. and others
-#
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v2.0
-# and Eclipse Distribution License v1.0 which accompany this distribution.
-#
-# The Eclipse Public License is available at
-#    http://www.eclipse.org/legal/epl-v10.html
-# and the Eclipse Distribution License is available at
-#   http://www.eclipse.org/org/documents/edl-v10.php.
-#
-# Contributors:
-#    Composiv.ai, Eteration A.S. - initial API and implementation
-#
-#
-#!/usr/bin/env python
+from setuptools import setup
+import os
+from glob import glob
 
-from distutils.core import setup
-from catkin_pkg.python_setup import generate_distutils_setup
-d = generate_distutils_setup(
-    packages=['core','core.ditto','core.model','core.introspector'],
-    package_dir={'': 'src'}
+package_name = 'core'
+
+setup(
+    name=package_name,
+    version='1.0.0',
+    packages=[package_name],
+    data_files=[
+        ('share/ament_index/resource_index/packages',['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.yaml")),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='Alp SARICA',
+    maintainer_email='alp.sarica@eteration.com',
+    description='Eclipse Muto Core Package',
+    license='Eclipse Public License v2.0',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'twin = core.twin:main'
+        ],
+    },
 )
-setup(**d)
