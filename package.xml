@@ -1,26 +1,17 @@
 <?xml version="1.0"?>
-<package format="2">
-  <name>muto_core</name>
-  <version>0.0.1</version>
-  <description>The muto_core package</description>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>core</name>
+  <version>1.0.0</version>
+  <description>Eclipse Muto Core Package</description>
+  <maintainer email="alp.sarica@eteration.com">Alp SARICA</maintainer>
+  <license>Eclipse Public License v2.0</license>
 
-  <url>https://eclipse-muto.github.io/docs/</url>
-  <maintainer email="muto-dev@eclipse.org">Muto</maintainer>
-
-  <license>EPL 2.0</license>
-
-
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>rostest</build_depend>
-  <build_depend>rosunit</build_depend>
-  <test_depend>coverage</test_depend>
-
-
-  <build_export_depend>rospy</build_export_depend>
-  <exec_depend>rospy</exec_depend>
-
+  <test_depend>python3-pytest</test_depend>
+  
+  <depend>python3-requests</depend>
 
   <export>
+    <build_type>ament_python</build_type>
   </export>
 </package>

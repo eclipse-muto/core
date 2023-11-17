@@ -1,3 +1,0 @@
-<launch>
-    <test pkg="muto_core" test-name="Muto_Core_Test_EdgeDevice" type="core_testcases_edge_device.py"/>
-</launch> 
