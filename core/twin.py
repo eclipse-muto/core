@@ -128,7 +128,7 @@ class Twin(Node):
             json=self.device_register_data()
         )
 
-        if res.status_code == 400:
+        if res.status_code == 400 or res.status_code == 404:
             data = self.device_register_data()
             data['policyId'] = self.thing_id
             res = requests.put(
@@ -137,19 +137,11 @@ class Twin(Node):
                 json=data
             )
 
-        # If device wasn't registered earlier, following if block will run
-        if res.status_code == 404:
-            res = requests.put(
-                f"{self.twin_url}/api/2/things/{self.thing_id}",
-                headers={"Content-type": "application/json"},
-                json=self.device_register_data()
-            )
-
         if res.status_code == 201 or res.status_code == 204:
             self.get_logger().info(f"Device registered successfully.")
         else:
             self.get_logger().warn(
-                f"Device registration was unsuccessful - {res.status_code}.")
+                f"Device registration was unsuccessful. Status Code: {res.status_code}.")
 
         return res.status_code
 
@@ -164,7 +156,7 @@ class Twin(Node):
             self.get_logger().info(f"Telemetry properties received successfully.")
         else:
             self.get_logger().warn(
-                f"Getting telemetry properties was unsuccessful - {res.status_code}.")
+                f"Getting telemetry properties was unsuccessful - {res.status_code} {res.text}.")
 
         payload = json.loads(res.text)
 
