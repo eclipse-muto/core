@@ -128,9 +128,17 @@ class Twin(Node):
             json=self.device_register_data()
         )
 
-        if res.status_code == 400 or res.status_code == 404:
+        if res.status_code == 400:
             data = self.device_register_data()
             data['policyId'] = self.thing_id
+            res = requests.put(
+                f"{self.twin_url}/api/2/things/{self.thing_id}",
+                headers={"Content-type": "application/json"},
+                json=data
+            )
+        
+        if res.status_code == 404:
+            data = self.device_register_data()
             res = requests.put(
                 f"{self.twin_url}/api/2/things/{self.thing_id}",
                 headers={"Content-type": "application/json"},
