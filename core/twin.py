@@ -26,7 +26,7 @@ from core.twin_services import TwinServices
 import uuid
 import json
 import requests
-
+import socket
 
 class Twin(Node):
     """TODO add documentation."""
@@ -61,8 +61,16 @@ class Twin(Node):
         # Services
         TwinServices(self, self.get_name())
 
+        # Internet connectivity
+        self.internet_status = False
+        socket.setdefaulttimeout(3.0)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.check_internet_conn = self.create_timer(3.0, self.connection_status)
+
         # Register Device
-        self.register_device()
+        self.is_device_registered = False
+        if self.internet_status:
+            self.register_device()
 
     def get_current_properties(self):
         return self.stack(self.thing_id)
@@ -147,6 +155,7 @@ class Twin(Node):
 
         if res.status_code == 201 or res.status_code == 204:
             self.get_logger().info(f"Device registered successfully.")
+            self.is_device_registered = True
         else:
             self.get_logger().warn(
                 f"Device registration was unsuccessful. Status Code: {res.status_code}.")
@@ -256,6 +265,16 @@ class Twin(Node):
 
         return data
 
+    def connection_status(self):
+        try:
+            self.socket.connect((self.twin_url.split("@")[1], 1883))
+            if not self.is_device_registered:
+                self.register_device()
+
+            self.internet_status = True
+        except socket.error as ex:
+            self.internet_status = False
+            self.get_logger().warn("Twin Server ping failed!")
 
 def main():
     rclpy.init()

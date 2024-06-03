@@ -38,6 +38,7 @@ class TwinServices():
         self.node.create_service(CoreTwin, f"{self.nname}/get_registered_telemetries", self.callback_get_registered_telemetries)
         self.node.create_service(CoreTwin, f"{self.nname}/register_telemetry", self.callback_register_telemetry)
         self.node.create_service(CoreTwin, f"{self.nname}/delete_telemetry", self.callback_delete_telemetry)
+        self.node.create_service(CoreTwin, f"{self.nname}/get_internet_status", self.callback_get_internet_status)
 
 
 
@@ -106,6 +107,12 @@ class TwinServices():
         status_code = self.node.delete_telemtry(payload)
 
         response.output = str(status_code)
+
+        return response
+    
+    def callback_get_internet_status(self, request, response):
+        """" # TODO add docs."""       
+        response.output = str(self.node.internet_status)
 
         return response
         
