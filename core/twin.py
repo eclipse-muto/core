@@ -58,17 +58,17 @@ class Twin(Node):
         self.topic = f"{self.namespace}:{self.unique_name}"
         self.thing_id = f"{self.namespace}:{self.name}"
 
+        self.internet_status = False
+        self.is_device_registered = False
+
         # Services
         TwinServices(self, self.get_name())
 
         # Internet connectivity
-        self.internet_status = False
         socket.setdefaulttimeout(3.0)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.check_internet_conn = self.create_timer(3.0, self.connection_status)
 
         # Register Device
-        self.is_device_registered = False
         if self.internet_status:
             self.register_device()
 
@@ -266,15 +266,19 @@ class Twin(Node):
         return data
 
     def connection_status(self):
-        try:
-            self.socket.connect((self.twin_url.split("@")[1], 1883))
+        try:     
+            self.socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket_.connect((self.twin_url.split("@")[1], 1883))
+
             if not self.is_device_registered:
                 self.register_device()
 
             self.internet_status = True
         except socket.error as ex:
             self.internet_status = False
-            self.get_logger().warn("Twin Server ping failed!")
+            self.get_logger().warn(f"Twin Server ping failed: {ex}")
+        finally:
+            del self.socket_
 
 def main():
     rclpy.init()
