@@ -28,12 +28,18 @@ import json
 import requests
 import socket
 
+URL_API = "/api/2/things/"
+URL_FEATURE_STACK = "/features/stack/"
+URL_CURRENT_STACK = f"{URL_FEATURE_STACK}properties/current/"
+REQUEST_HEADER_JSON = {"Content-type": "application/json"}
+
+
 class Twin(Node):
     """
     Represents a twin device node that interacts with a twin server.
 
     This class handles the registration, telemetry management, and status checks for a twin device.
-    It extends the ROS 2 Node class and utilizes parameters to configure the device's settings and interactions 
+    It extends the ROS 2 Node class and utilizes parameters to configure the device's settings and interactions
     with the twin server.
 
     Attributes:
@@ -86,7 +92,9 @@ class Twin(Node):
         self.namespace = self.get_parameter("namespace").value
         self.name = self.get_parameter("name").value
         self.type = self.get_parameter("type").value
-        self.unique_name = f"{self.type}.{str(uuid.uuid4())}" if self.anonymous else self.name
+        self.unique_name = (
+            f"{self.type}.{str(uuid.uuid4())}" if self.anonymous else self.name
+        )
         self.attributes = json.loads(self.get_parameter("attributes").value)
         self.definition = self.get_parameter("definition").value
         self.topic = f"{self.namespace}:{self.unique_name}"
@@ -107,46 +115,62 @@ class Twin(Node):
             self.register_device()
 
     def get_current_properties(self):
+        """Retrieves the current properties of the device's stack."""
         return self.stack(self.thing_id)
 
-    def get_stack_definition(self, stack_id):
+    def get_stack_definition(self, stack_id: str):
+        """Retrieves the stack definition for a given stack ID."""
         return self.stack(stack_id)
 
-    def stack(self, thing_id):
+    def stack(self, thing_id: str) -> dict | None:
+        """The method that sends the requests if  acquire stack data"""
         try:
-            r = requests.get(self.twin_url + "/api/2/things/" +
-                             thing_id + '/features/stack')
-            print("Status Code: %d, Response: %s" % (r.status_code, r.text))
+            if (not self.twin_url) or (not thing_id):
+                return None
+
+            url = self.twin_url + URL_API + thing_id + URL_FEATURE_STACK
+            r = requests.get(url=url, headers=REQUEST_HEADER_JSON, timeout=5)
+            self.get_logger().info(f"Stack getting Status Code: {r.status_code}")
+
             if r.status_code >= 300:
                 return {}
             payload = json.loads(r.text)
-            return payload.get('properties', {})
+            return payload.get("properties", {})
+
+        except requests.exceptions.Timeout as t:
+            self.get_logger().error(
+                f"Request timed out when trying to get stack from twins repo: {t}"
+            )
+        except requests.exceptions.RequestException as r:
+            self.get_logger().error(
+                f"Request error when trying to get stack from twins repo: {r}"
+            )
+        except json.JSONDecodeError as j:
+            self.get_logger().error(
+                f"Failed to decode JSON response when getting stack from twins repo: {j}"
+            )
         except Exception as e:
-            self.get_logger().error(f'Could not get stack from twins repo {e}')
+            self.get_logger().error(
+                f"Unexpected error when trying to get stack from twins repo: {e}"
+            )
         return None
 
-    def set_current_stack(self, stack, state='unknown'):
-        if not stack:
-            return
-        deftn = stack.manifest
-        self.get_logger().info(f"Setting current stack to {deftn}")
-        stack_id = deftn.get('stackId', None)
-        headers = {'Content-type': 'application/json'}
-
-        if not stack_id is None:
-            r = requests.put(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
-                             headers=headers, json={"stackId": stack_id, "state": state})
-            print("Status Code: %d, Response: %s" % (r.status_code, r.text))
+    def set_current_stack(self, stack_id: str, state: str = "unknown"):
+        """Sets the Edge Device's current stack to the given stack_id"""
+        if not stack_id:
             return
 
-        stacks = deftn.get('stack', [])
-        for s in stacks:
-            id = s.get('thingId', '')
-            if id:
-                r = requests.post(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
-                                  headers=headers, json={"stackId": id, "state": state})
-                print("Status Code: %d, Response: %s" %
-                      (r.status_code, r.text))
+        url = self.twin_url + URL_API + self.thing_id + URL_CURRENT_STACK
+        if stack_id:
+            r = requests.put(
+                url=url,
+                headers=REQUEST_HEADER_JSON,
+                json={"stackId": stack_id, "state": state},
+                timeout=5,
+            )
+            self.get_logger().info(
+                f"Stack setting status code: {r.status_code} | output: {r.text}"
+            )
 
     def get_context(self):
         """Return information about the device."""
@@ -177,24 +201,24 @@ class Twin(Node):
         res = requests.patch(
             f"{self.twin_url}/api/2/things/{self.thing_id}",
             headers={"Content-type": "application/merge-patch+json"},
-            json=self.device_register_data()
+            json=self.device_register_data(),
         )
 
         if res.status_code == 400:
             data = self.device_register_data()
-            data['policyId'] = self.thing_id
+            data["policyId"] = self.thing_id
             res = requests.put(
                 f"{self.twin_url}/api/2/things/{self.thing_id}",
                 headers={"Content-type": "application/json"},
-                json=data
+                json=data,
             )
-        
+
         if res.status_code == 404:
             data = self.device_register_data()
             res = requests.put(
                 f"{self.twin_url}/api/2/things/{self.thing_id}",
                 headers={"Content-type": "application/json"},
-                json=data
+                json=data,
             )
 
         if res.status_code == 201 or res.status_code == 204:
@@ -202,7 +226,8 @@ class Twin(Node):
             self.is_device_registered = True
         else:
             self.get_logger().warn(
-                f"Device registration was unsuccessful. Status Code: {res.status_code}.")
+                f"Device registration was unsuccessful. Status Code: {res.status_code}."
+            )
 
         return res.status_code
 
@@ -220,14 +245,15 @@ class Twin(Node):
         """
         res = requests.get(
             f"{self.twin_url}/api/2/things/{self.thing_id}/features/telemetry/properties",
-            headers={"Content-type": "application/json"}
+            headers={"Content-type": "application/json"},
         )
 
         if res.status_code == 200:
             self.get_logger().info(f"Telemetry properties received successfully.")
         else:
             self.get_logger().warn(
-                f"Getting telemetry properties was unsuccessful - {res.status_code} {res.text}.")
+                f"Getting telemetry properties was unsuccessful - {res.status_code} {res.text}."
+            )
 
         payload = json.loads(res.text)
 
@@ -257,9 +283,10 @@ class Twin(Node):
 
         if current_definition != None:
             filtered = filter(
-                lambda x: True if x.get(
-                    "topic") != req_telemetry.get("topic") else False,
-                current_definition
+                lambda x: (
+                    True if x.get("topic") != req_telemetry.get("topic") else False
+                ),
+                current_definition,
             )
             new_definition = list(filtered)
 
@@ -268,7 +295,7 @@ class Twin(Node):
         res = requests.put(
             f"{self.twin_url}/api/2/things/{self.thing_id}/features/telemetry/properties/definition",
             headers={"Content-type": "application/json"},
-            json=new_definition
+            json=new_definition,
         )
 
         if res.status_code == 201:
@@ -277,7 +304,8 @@ class Twin(Node):
             self.get_logger().info(f"Telemetry modified successfully.")
         else:
             self.get_logger().warn(
-                f"Telemetry registration was unsuccessful - {res.status_code}.")
+                f"Telemetry registration was unsuccessful - {res.status_code}."
+            )
 
         return res.status_code
 
@@ -305,43 +333,52 @@ class Twin(Node):
 
         if current_definition != None:
             filtered = filter(
-                lambda x: True if x.get(
-                    "topic") != req_telemetry.get("topic") else False,
-                current_definition
+                lambda x: (
+                    True if x.get("topic") != req_telemetry.get("topic") else False
+                ),
+                current_definition,
             )
             new_definition = list(filtered)
 
         res = requests.put(
             f"{self.twin_url}/api/2/things/{self.thing_id}/features/telemetry/properties/definition",
             headers={"Content-type": "application/json"},
-            json=new_definition
+            json=new_definition,
         )
 
         if res.status_code == 204:
             self.get_logger().info(f"Telemetry deleted successfully.")
         else:
             self.get_logger().warn(
-                f"Telemetry deletion was unsuccessful - {res.status_code}.")
+                f"Telemetry deletion was unsuccessful - {res.status_code}."
+            )
 
         return res.status_code
 
     def device_register_data(self):
-        """ Constructs the data dictionary required for device registration with the twin server. """
-        data = {
-            "definition": self.definition,
-            "attributes": self.attributes,
-            "features": {
-                "context": {
-                    "properties": {}
-                },
-                "stack": {
-                    "properties": {}
-                },
-                "telemetry": {
-                    "properties": {}
-                }
+        """Constructs the data dictionary required for device registration with the twin server."""
+        features = self.get_parameters_by_prefix("features")
+        feature_dict = {}
+        for feature in features:
+            print(feature)
+            feature_dict.update({feature: {"properties": {}}})
+
+        if features:
+            data = {
+                "definition": self.definition,
+                "attributes": self.attributes,
+                "features": feature_dict,
             }
-        }
+        else:  # If no feature is provided, rollback to defaults
+            data = {
+                "definition": self.definition,
+                "attributes": self.attributes,
+                "features": {
+                    "context": {"properties": {}},
+                    "stack": {"properties": {}},
+                    "telemetry": {"properties": {}},
+                },
+            }
 
         return data
 
@@ -353,7 +390,7 @@ class Twin(Node):
         If the connection is successful and the device is not registered, it calls the `register_device` method.
         The internet connection status is then updated accordingly. If the connection fails, it logs a warning message.
         """
-        try:     
+        try:
             self.socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket_.connect((self.twin_url.split("@")[1], 1883))
 
@@ -367,11 +404,12 @@ class Twin(Node):
         finally:
             del self.socket_
 
+
 def main():
     rclpy.init()
     twin = Twin()
     rclpy.spin(twin)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
