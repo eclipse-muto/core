@@ -93,7 +93,7 @@ class Twin(Node):
         self.name = self.get_parameter("name").value
         self.type = self.get_parameter("type").value
         self.unique_name = (
-            f"{self.type}.{str(uuid.uuid4())}" if self.anonymous else self.name
+            f"{self.namespace}:{str(uuid.uuid4())}" if self.anonymous else self.name
         )
         self.attributes = json.loads(self.get_parameter("attributes").value)
         self.definition = self.get_parameter("definition").value
@@ -199,16 +199,17 @@ class Twin(Node):
             int: The HTTP status code from the final registration attempt.
         """
         res = requests.patch(
-            f"{self.twin_url}/api/2/things/{self.thing_id}",
+            f"{self.twin_url}/api/2/things/{self.unique_name}",
             headers={"Content-type": "application/merge-patch+json"},
             json=self.device_register_data(),
         )
+        self.get_logger().info(f"unique name: {self.unique_name}")
 
         if res.status_code == 400:
             data = self.device_register_data()
             data["policyId"] = self.thing_id
             res = requests.put(
-                f"{self.twin_url}/api/2/things/{self.thing_id}",
+                f"{self.twin_url}/api/2/things/{self.unique_name}",
                 headers={"Content-type": "application/json"},
                 json=data,
             )
@@ -216,13 +217,13 @@ class Twin(Node):
         if res.status_code == 404:
             data = self.device_register_data()
             res = requests.put(
-                f"{self.twin_url}/api/2/things/{self.thing_id}",
+                f"{self.twin_url}/api/2/things/{self.unique_name}",
                 headers={"Content-type": "application/json"},
                 json=data,
             )
 
-        if res.status_code == 201 or res.status_code == 204:
-            self.get_logger().info(f"Device registered successfully.")
+        if res.status_code in (201, 204):
+            self.get_logger().info("Device registered successfully.")
             self.is_device_registered = True
         else:
             self.get_logger().warn(
