@@ -199,7 +199,7 @@ class Twin(Node):
             int: The HTTP status code from the final registration attempt.
         """
         res = requests.patch(
-            f"{self.twin_url}/api/2/things/{self.unique_name}",
+            f"{self.twin_url}/api/2/things/{self.thing_id}",
             headers={"Content-type": "application/merge-patch+json"},
             json=self.device_register_data(),
         )
@@ -208,7 +208,7 @@ class Twin(Node):
             data = self.device_register_data()
             data["policyId"] = self.thing_id
             res = requests.put(
-                f"{self.twin_url}/api/2/things/{self.unique_name}",
+                f"{self.twin_url}/api/2/things/{self.thing_id}",
                 headers={"Content-type": "application/json"},
                 json=data,
             )
@@ -216,7 +216,7 @@ class Twin(Node):
         if res.status_code == 404:
             data = self.device_register_data()
             res = requests.put(
-                f"{self.twin_url}/api/2/things/{self.unique_name}",
+                f"{self.twin_url}/api/2/things/{self.thing_id}",
                 headers={"Content-type": "application/json"},
                 json=data,
             )
