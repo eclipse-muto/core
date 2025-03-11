@@ -41,8 +41,8 @@ class TestTwinServices(unittest.TestCase):
         rclpy.shutdown()
 
     def test_callback_get_current_properties(self):
-        request = MagicMock.Request()
-        response = MagicMock.Response()
+        request = MagicMock().Request()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_get_current_properties(request, response)
 
@@ -52,9 +52,9 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, expected)
 
     def test_callback_get_stack_definition(self):
-        request = MagicMock.Request()
+        request = MagicMock().Request()
         request.input = "test_stack_id"
-        response = MagicMock.Response()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_get_stack_definition(request, response)
 
@@ -64,9 +64,9 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, expected)
 
     def test_callback_set_current_stack(self):
-        request = MagicMock.Request()
+        request = MagicMock().Request()
         request.input = '{"stack_config": "test_input_config"}'
-        response = MagicMock.Response()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_set_current_stack(request, response)
 
@@ -77,8 +77,8 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, "200")
 
     def test_callback_get_context(self):
-        request = MagicMock.Request()
-        response = MagicMock.Response()
+        request = MagicMock().Request()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_get_context(request, response)
 
@@ -88,8 +88,8 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, expected)
 
     def test_callback_register_device(self):
-        request = MagicMock.Request()
-        response = MagicMock.Response()
+        request = MagicMock().Request()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_register_device(request, response)
 
@@ -98,8 +98,8 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, "201")
 
     def test_callback_get_registered_telemetries(self):
-        request = MagicMock.Request()
-        response = MagicMock.Response()
+        request = MagicMock().Request()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_get_registered_telemetries(
             request, response
@@ -110,9 +110,9 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, '{"telemetry_key": "test_telemetry_value"}')
 
     def test_callback_register_telemetry(self):
-        request = MagicMock.Request()
+        request = MagicMock().Request()
         request.input = '{"new_telemetry": "test_new_telemetry_value"}'
-        response = MagicMock.Response()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_register_telemetry(request, response)
 
@@ -123,9 +123,9 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, "202")
 
     def test_callback_delete_telemetry(self):
-        request = MagicMock.Request()
+        request = MagicMock().Request()
         request.input = '{"telemetry_to_delete": "test_delete_telemetry_value"}'
-        response = MagicMock.Response()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_delete_telemetry(request, response)
 
@@ -136,8 +136,8 @@ class TestTwinServices(unittest.TestCase):
         self.assertEqual(response.output, "203")
 
     def test_callback_get_internet_status(self):
-        request = MagicMock.Request()
-        response = MagicMock.Response()
+        request = MagicMock().Request()
+        response = MagicMock().Response()
 
         response = self.twin_services.callback_get_internet_status(request, response)
 
