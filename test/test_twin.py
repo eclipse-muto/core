@@ -48,7 +48,7 @@ class TestTwin(unittest.TestCase):
         returned_value = self.node.stack(self.node.thing_id)
 
         self.assertIsNone(returned_value)
-        mock_req.assert_called_once_with(
+        mock_req.assert_called_once_with(url=
             "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack"
         )
 
@@ -60,7 +60,7 @@ class TestTwin(unittest.TestCase):
         returned_value = self.node.stack(self.node.thing_id)
 
         self.assertEqual(returned_value, {})
-        mock_req.assert_called_once_with(
+        mock_req.assert_called_once_with(url=
             "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack"
         )
 
@@ -73,38 +73,22 @@ class TestTwin(unittest.TestCase):
         returned_value = self.node.stack(self.node.thing_id)
 
         self.assertEqual(returned_value, "test_properties")
-        mock_req.assert_called_once_with(
+        mock_req.assert_called_once_with(url=
             "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack"
         )
 
     @patch("requests.put")
     def test_set_current_stack(self, mock_put):
         test_stack = MagicMock()
-        test_stack.manifest = {"stackId": "test_set_current_stack_stackId"}
-        self.node.set_current_stack(test_stack)
-        self.node.get_logger().info.assert_called_once_with(
-            "Setting current stack to {'stackId': 'test_set_current_stack_stackId'}"
-        )
+        test_stack.status_code = 200
+        test_stack.text = "test_output"
+        mock_put.return_value = test_stack
+        self.node.set_current_stack("test_stack_id","test_state")
+        self.node.get_logger().info.assert_called_once_with("Stack setting status code: 200 | output: test_output")
         mock_put.assert_called_once_with(
             "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack/properties/current",
             headers={"Content-type": "application/json"},
-            json={"stackId": "test_set_current_stack_stackId", "state": "unknown"},
-        )
-
-    @patch("requests.post")
-    @patch("requests.put")
-    def test_set_current_stack_post(self, mock_put, mock_post):
-        test_stack = MagicMock()
-        test_stack.manifest = {
-            "stackId": None,
-            "stack": [{"thing_id": "test_set_current_stack_thing"}],
-        }
-        self.node.set_current_stack(test_stack)
-        mock_put.assert_not_called()
-        mock_post.assert_called_once_with(
-            "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack/properties/current",
-            headers={"Content-type": "application/json"},
-            json={"stackId": "test_set_current_stack_thing", "state": "unknown"},
+            json={"stackId":"test_stack_id", "state":"test_state"},
         )
 
     def test_set_current_stack_none(self):
