@@ -97,7 +97,7 @@ class TestTwin(unittest.TestCase):
         test_stack.text = "test_output"
         mock_put.return_value = test_stack
         self.node.set_current_stack("test_stack_id","test_state")
-        self.node.get_logger().info.assert_called_once_with("Stack setting status code: 200 | output: test_output")
+        self.node.get_logger().info.assert_called_once_with("Status Code: 200, Response: test_output")
         mock_put.assert_called_once_with(
             "http://sandbox.composiv.ai/api/2/things/test_thing_id/features/stack/properties/current",
             headers={"Content-type": "application/json"},
