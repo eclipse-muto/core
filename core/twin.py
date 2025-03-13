@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2023 Composiv.ai
+#  Copyright (c) 2025 Composiv.ai
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
@@ -33,7 +33,7 @@ class Twin(Node):
     Represents a twin device node that interacts with a twin server.
 
     This class handles the registration, telemetry management, and status checks for a twin device.
-    It extends the ROS 2 Node class and utilizes parameters to configure the device's settings and interactions 
+    It extends the ROS 2 Node class and utilizes parameters to configure the device's settings and interactions
     with the twin server.
 
     Attributes:
@@ -107,46 +107,57 @@ class Twin(Node):
             self.register_device()
 
     def get_current_properties(self):
+        """Retrieves the current properties of the device's stack."""
         return self.stack(self.thing_id)
 
-    def get_stack_definition(self, stack_id):
+    def get_stack_definition(self, stack_id: str):
+        """Retrieves the stack definition for a given stack ID."""
         return self.stack(stack_id)
 
-    def stack(self, thing_id):
+    def stack(self, thing_id: str) -> dict | None:
+        """The method that sends the requests if  acquire stack data"""
         try:
-            r = requests.get(self.twin_url + "/api/2/things/" +
-                             thing_id + '/features/stack')
-            print("Status Code: %d, Response: %s" % (r.status_code, r.text))
+            if (not self.twin_url) or (not thing_id):
+                return None
+            r = requests.get(url=self.twin_url + "/api/2/things/" +
+                             thing_id + "/features/stack")
+            self.get_logger().info(f"Stack getting Status Code: {r.status_code}")
+
             if r.status_code >= 300:
                 return {}
             payload = json.loads(r.text)
-            return payload.get('properties', {})
+            return payload.get("properties", {})
+
+        except requests.exceptions.Timeout as t:
+            self.get_logger().error(
+                f"Request timed out when trying to get stack from twins repo: {t}"
+            )
+        except requests.exceptions.RequestException as r:
+            self.get_logger().error(
+                f"Request error when trying to get stack from twins repo: {r}"
+            )
+        except json.JSONDecodeError as j:
+            self.get_logger().error(
+                f"Failed to decode JSON response when getting stack from twins repo: {j}"
+            )
         except Exception as e:
-            self.get_logger().error(f'Could not get stack from twins repo {e}')
+            self.get_logger().error(
+                f"Unexpected error when trying to get stack from twins repo: {e}"
+            )
         return None
 
-    def set_current_stack(self, stack, state='unknown'):
-        if not stack:
+    def set_current_stack(self, stack_id: str, state: str = "unknown"):
+        """Sets the Edge Device's current stack to the given stack_id"""
+        if not stack_id:
             return
-        deftn = stack.manifest
-        self.get_logger().info(f"Setting current stack to {deftn}")
-        stack_id = deftn.get('stackId', None)
+
         headers = {'Content-type': 'application/json'}
 
-        if not stack_id is None:
-            r = requests.put(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
+        if stack_id:
+            r = requests.put(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thing_id),
                              headers=headers, json={"stackId": stack_id, "state": state})
-            print("Status Code: %d, Response: %s" % (r.status_code, r.text))
-            return
+            self.get_logger().info(f"Status Code: {r.status_code}, Response: {r.text}")
 
-        stacks = deftn.get('stack', [])
-        for s in stacks:
-            id = s.get('thingId', '')
-            if id:
-                r = requests.post(self.twin_url + "/api/2/things/{}/features/stack/properties/current".format(self.thingId),
-                                  headers=headers, json={"stackId": id, "state": state})
-                print("Status Code: %d, Response: %s" %
-                      (r.status_code, r.text))
 
     def get_context(self):
         """Return information about the device."""
