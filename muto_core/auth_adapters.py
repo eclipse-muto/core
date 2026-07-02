@@ -142,9 +142,11 @@ class OAuth2Adapter(AuthAdapter):
 
 
 _ADAPTER_FACTORIES = {
-    "none": lambda node : NoneAuthAdapter(),
-    "basic": lambda node : BasicAuthAdapter(node),
-    "oauth2": lambda node : OAuth2Adapter(node,),
+    "none": lambda node: NoneAuthAdapter(),
+    "basic": lambda node: BasicAuthAdapter(node),
+    "oauth2": lambda node: OAuth2Adapter(
+        node,
+    ),
 }
 
 
