@@ -248,6 +248,26 @@ class TwinServices:
         return response
 
     def callback_get_credentials(self, request, response):
-        response.output = json.dumps(self.node.get_credentials())
+        """
+        Retrieves device credentials.
+
+        This method is a callback function designed to handle a request for retrieving credentials.
+        It checks the internet connection status from the associated 'node' instance.
+        If an active internet connection is present, it fetches the credentials using the
+        'get_credentials' method and sets the JSON-serialized data as the output in the
+        response object. If no internet connection is available, it sets a JSON-formatted
+        error message as the output instead.
+
+        Args:
+            request: The request object containing input data.
+            response: The response object for returning output data.
+
+        Returns:
+            response: The response object containing the credentials or an error message as a JSON string.
+        """
+        if self.node.internet_status:
+            response.output = json.dumps(self.node.get_credentials())
+        else:
+            response.output = json.dumps({"error": "no internet"})
 
         return response
