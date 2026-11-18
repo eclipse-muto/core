@@ -11,8 +11,6 @@
   <url type="repository">https://github.com/eclipse-muto/core</url>
   <url type="bugtracker">https://github.com/eclipse-muto/core/issues</url>
 
-  <buildtool_depend>ament_python</buildtool_depend>
-
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
